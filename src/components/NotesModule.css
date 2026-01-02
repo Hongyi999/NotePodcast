@@ -1,0 +1,154 @@
+.notes-module {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.module-title {
+  font-size: 16px;
+  color: var(--color-text-primary);
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.sort-controls {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.sort-button.active {
+  border-bottom: 1px solid var(--color-primary);
+}
+
+.notes-list {
+  flex: 1;
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius-sm);
+  padding: 16px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+  min-height: 200px;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--color-text-hint);
+  font-size: 14px;
+  padding: 40px 20px;
+}
+
+.note-card {
+  background-color: var(--color-background);
+  border-radius: var(--border-radius-sm);
+  padding: 12px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.note-card:hover {
+  background-color: var(--color-highlight);
+}
+
+.note-card:hover .delete-button {
+  opacity: 1;
+}
+
+.note-content {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  align-items: flex-start;
+}
+
+.note-time {
+  font-size: 14px;
+  color: var(--color-primary);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.note-text {
+  font-size: 14px;
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}
+
+.delete-button {
+  background: none;
+  border: none;
+  color: var(--color-text-hint);
+  cursor: pointer;
+  padding: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease, color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-button:hover {
+  color: var(--color-error);
+}
+
+.note-input-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.note-input {
+  flex: 1;
+  height: 40px;
+}
+
+.voice-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-background);
+  color: var(--color-text-hint);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.voice-button:hover:not(:disabled) {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.voice-button.recording {
+  background-color: var(--color-error);
+  color: white;
+  border-color: var(--color-error);
+}
+
+.voice-button.transcribing {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.voice-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.confirm-note-button {
+  flex-shrink: 0;
+}
+
+.confirm-note-button:disabled {
+  color: var(--color-text-hint);
+  cursor: not-allowed;
+}
+

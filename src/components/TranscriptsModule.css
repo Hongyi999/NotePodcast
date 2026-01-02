@@ -1,0 +1,73 @@
+.transcripts-module {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.translation-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.translation-dropdown {
+  flex-shrink: 0;
+}
+
+.translating-indicator {
+  font-size: 12px;
+  color: var(--color-text-hint);
+}
+
+.transcript-content {
+  flex: 1;
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius-sm);
+  padding: 16px;
+  overflow-y: auto;
+  min-height: 200px;
+}
+
+.transcript-text {
+  font-size: 14px;
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}
+
+.transcript-text p {
+  margin-bottom: 12px;
+}
+
+.transcript-text p:last-child {
+  margin-bottom: 0;
+}
+
+.transcript-loading,
+.transcript-error,
+.transcript-empty,
+.translation-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.transcript-loading p,
+.transcript-empty p {
+  font-size: 14px;
+  color: var(--color-text-hint);
+}
+
+.transcript-error p,
+.translation-error p {
+  font-size: 14px;
+  color: var(--color-error);
+}
+
+.translation-error {
+  margin-top: 12px;
+  min-height: auto;
+  justify-content: flex-start;
+}
+

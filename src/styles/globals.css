@@ -1,0 +1,182 @@
+/* Apple Design System - CSS Variables */
+:root {
+  --color-primary: #007AFF;
+  --color-primary-hover: #0066CC;
+  --color-background: #FFFFFF;
+  --color-surface: #F9FAFB;
+  --color-text-primary: #111827;
+  --color-text-secondary: #4B5563;
+  --color-text-hint: #9CA3AF;
+  --color-error: #EF4444;
+  --color-border: #E5E7EB;
+  --color-highlight: #EFF6FF;
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', 'Inter', sans-serif;
+}
+
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Apple-style Hidden Scrollbar */
+.hidden-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.hidden-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.hidden-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 3px;
+  opacity: 0.5;
+}
+
+.hidden-scrollbar::-webkit-scrollbar-thumb:hover {
+  opacity: 1;
+}
+
+/* Apple-style Button */
+.apple-button {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-family: var(--font-family);
+}
+
+.apple-button:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.apple-button:disabled {
+  background-color: var(--color-text-hint);
+  cursor: not-allowed;
+}
+
+.apple-button-text {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--border-radius-sm);
+  transition: color 0.2s ease;
+  font-family: var(--font-family);
+}
+
+.apple-button-text:hover {
+  color: var(--color-primary-hover);
+}
+
+/* Apple-style Input */
+.apple-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  font-size: 14px;
+  font-family: var(--font-family);
+  color: var(--color-text-primary);
+  background-color: var(--color-background);
+  transition: border-color 0.2s ease;
+}
+
+.apple-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.apple-input::placeholder {
+  color: var(--color-text-hint);
+}
+
+/* Apple-style Dropdown */
+.apple-dropdown {
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-family: var(--font-family);
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.apple-dropdown:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1366px) {
+  /* Adjustments for smaller screens */
+  .podcast-container {
+    flex-direction: column;
+  }
+}
+
+/* Safari-specific fixes */
+@supports (-webkit-appearance: none) {
+  /* Safari scrollbar styling */
+  .hidden-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .hidden-scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--color-border);
+    border-radius: 3px;
+  }
+
+  /* Fix for Safari audio playback */
+  audio {
+    -webkit-appearance: none;
+  }
+
+  /* Fix for Safari input styling */
+  .apple-input {
+    -webkit-appearance: none;
+  }
+
+  .apple-dropdown {
+    -webkit-appearance: none;
+  }
+}
+
+/* Smooth Transitions */
+* {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
