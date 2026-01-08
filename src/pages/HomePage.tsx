@@ -35,7 +35,7 @@ export function HomePage() {
     }
 
     // Navigate to podcast page with URL
-    navigate(`/loading?url=${encodeURIComponent(url)}`);
+    navigate(`/loading?url=${encodeURIComponent(url.trim())}`);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {

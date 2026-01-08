@@ -8,7 +8,7 @@ import './LoadingPage.css';
 export function LoadingPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const url = searchParams.get('url');
+  const url = searchParams.get('url')?.trim() || null;
 
   const { podcastData, loading, error, loadingSummaries, loadingTranscript } = usePodcastData(url);
 

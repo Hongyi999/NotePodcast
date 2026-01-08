@@ -126,15 +126,30 @@ function isXiaoyuzhoufmUrl(url: string): boolean {
  * Checks if URL is a YouTube URL
  */
 function isYouTubeUrl(url: string): boolean {
-  return url.includes('youtube.com/watch') || url.includes('youtu.be/');
+  try {
+    const u = new URL(url.trim());
+    const host = u.hostname.replace(/^www\./, '');
+    if (host === 'youtu.be') return true;
+    if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'music.youtube.com') return true;
+    return false;
+  } catch {
+    // fallback to simple substring check
+    return url.includes('youtube.com') || url.includes('youtu.be/');
+  }
 }
 
 async function parseYouTubePage(url: string): Promise<PodcastData> {
   // Use local backend to resolve metadata + proxy audio for <audio>
-  const infoRes = await fetch(`/api/youtube/info?url=${encodeURIComponent(url)}`);
+  const safeUrl = url.trim();
+  let infoRes: Response;
+  try {
+    infoRes = await fetch(`/api/youtube/info?url=${encodeURIComponent(safeUrl)}`);
+  } catch {
+    throw new Error('YouTube parsing requires the local backend. Please start it: `npm run dev:server`');
+  }
   if (!infoRes.ok) {
     const err = await infoRes.json().catch(() => ({}));
-    throw new Error(err?.error || 'Failed to resolve YouTube video');
+    throw new Error(err?.error || 'Failed to resolve YouTube video (is the backend running?)');
   }
   const info = await infoRes.json();
 
@@ -144,7 +159,7 @@ async function parseYouTubePage(url: string): Promise<PodcastData> {
   const { intro, summaryNotes } = parseShownotes(shownotes);
 
   return {
-    audioUrl: `/api/youtube/audio?url=${encodeURIComponent(url)}`,
+    audioUrl: `/api/youtube/audio?url=${encodeURIComponent(safeUrl)}`,
     title,
     description,
     shownotes,
