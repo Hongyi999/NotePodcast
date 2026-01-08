@@ -2,72 +2,75 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  padding: 20px;
 }
 
-.translation-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.module-title {
+  font-size: 18px;
+  font-weight: 600;
   margin-bottom: 16px;
-}
-
-.translation-dropdown {
-  flex-shrink: 0;
-}
-
-.translating-indicator {
-  font-size: 12px;
-  color: var(--color-text-hint);
+  color: var(--color-text-primary);
 }
 
 .transcript-content {
   flex: 1;
-  background-color: var(--color-surface);
-  border-radius: var(--border-radius-sm);
-  padding: 16px;
   overflow-y: auto;
-  min-height: 200px;
+  padding-right: 8px;
+  max-height: 500px; /* Provide a base constraint that parent will likely override with flex */
 }
 
-.transcript-text {
-  font-size: 14px;
+.transcript-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.transcript-item {
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.transcript-item:hover {
+  background-color: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+.transcript-item.active {
+  background-color: rgba(0, 122, 255, 0.05);
+  border-color: var(--color-primary);
+}
+
+.line-time {
+  font-family: 'SF Mono', 'Monaco', monospace;
+  font-size: 12px;
+  color: var(--color-primary);
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.line-text {
+  font-size: 15px;
+  line-height: 1.6;
   color: var(--color-text-primary);
-  line-height: 1.5;
+  display: block;
 }
 
-.transcript-text p {
-  margin-bottom: 12px;
-}
-
-.transcript-text p:last-child {
-  margin-bottom: 0;
+.transcript-item.active .line-text {
+  color: var(--color-primary);
+  font-weight: 500;
 }
 
 .transcript-loading,
 .transcript-error,
-.transcript-empty,
-.translation-error {
+.transcript-empty {
   display: flex;
-  align-items: center;
   justify-content: center;
-  min-height: 200px;
-}
-
-.transcript-loading p,
-.transcript-empty p {
-  font-size: 14px;
+  align-items: center;
+  height: 200px;
   color: var(--color-text-hint);
-}
-
-.transcript-error p,
-.translation-error p {
   font-size: 14px;
-  color: var(--color-error);
 }
-
-.translation-error {
-  margin-top: 12px;
-  min-height: auto;
-  justify-content: flex-start;
-}
-

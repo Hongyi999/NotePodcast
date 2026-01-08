@@ -1,42 +1,52 @@
 .summary-content {
-  min-height: 300px;
-  max-height: calc(100vh - 400px);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   overflow-y: auto;
   padding-right: 8px;
 }
 
 .summary-item {
   display: flex;
-  gap: 12px;
-  padding: 8px 0;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
   cursor: pointer;
   border-radius: var(--border-radius-sm);
-  padding-left: 8px;
-  padding-right: 8px;
   transition: background-color 0.2s ease;
+  margin-bottom: 8px;
+  border: 1px solid transparent;
 }
 
 .summary-item:hover {
   background-color: var(--color-surface);
+  border-color: var(--color-border);
 }
 
 .summary-item.highlighted {
   background-color: var(--color-highlight);
+  border-color: var(--color-primary);
 }
 
 .time-point {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--color-primary);
-  font-weight: 500;
+  font-weight: 600;
   flex-shrink: 0;
-  min-width: 50px;
+  padding: 4px 8px;
+  background-color: rgba(0, 122, 255, 0.08);
+  border-radius: 4px;
+  width: fit-content;
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
 }
 
 .summary-text {
   font-size: 14px;
   color: var(--color-text-primary);
-  line-height: 1.5;
+  line-height: 1.6;
   flex: 1;
+  word-wrap: break-word;
+  white-space: normal;
 }
 
 .summary-content.loading,

@@ -116,18 +116,19 @@ export function NotesModule({
 
   return (
     <div className="notes-module">
-      <h2 className="module-title">My Notes</h2>
-
-      <div className="sort-controls">
-        {SORT_OPTIONS.map((option) => (
-          <button
-            key={option.value}
-            className={`sort-button apple-button-text ${sortOption === option.value ? 'active' : ''}`}
-            onClick={() => onSortChange(option.value)}
-          >
-            {option.label}
-          </button>
-        ))}
+      <div className="module-header">
+        <h2 className="module-title">My Notes</h2>
+        <select
+          className="sort-dropdown"
+          value={sortOption}
+          onChange={(e) => onSortChange(e.target.value as SortOption)}
+        >
+          {SORT_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="notes-list hidden-scrollbar">

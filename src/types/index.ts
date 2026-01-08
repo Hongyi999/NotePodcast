@@ -15,6 +15,11 @@ export interface AISummary {
   items: SummaryItem[];
 }
 
+export interface TranscriptItem {
+  timePoint: number;
+  content: string;
+}
+
 export interface PodcastData {
   audioUrl: string;
   title?: string;
@@ -27,14 +32,18 @@ export interface PodcastData {
     summary2?: AISummary;
     summary3?: AISummary;
   };
-  transcript?: string;
+  transcript?: TranscriptItem[];
+  comments?: Comment[];
 }
 
 export interface Comment {
   id: string;
+  author?: string;
+  avatar?: string;
   timePoint: number; // in seconds
   content: string;
   createdAt: number; // timestamp
+  likeCount?: number;
 }
 
 export type SortOption = 'time' | 'newest' | 'oldest';

@@ -44,8 +44,14 @@ export function useAudioPlayer(audioUrl: string | null) {
       setError(null);
     };
 
+    let lastUpdateTime = 0;
     const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime);
+      // Throttle time updates to prevent excessive re-renders
+      const now = Date.now();
+      if (now - lastUpdateTime >= 100) { // Update at most every 100ms
+        setCurrentTime(audio.currentTime);
+        lastUpdateTime = now;
+      }
     };
 
     const handleEnded = () => {

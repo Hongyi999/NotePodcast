@@ -230,9 +230,75 @@ async function parseXiaoyuzhoufmPage(url: string): Promise<PodcastData> {
         shownotes = contentText;
       }
     }
+
+    // NEW: Extract Comments and Transcript from Xiaoyuzhoufm INITIAL_STATE
+    const comments: any[] = [];
+    let transcriptItems: any[] = [];
     
+    try {
+      // Use a more robust match for INITIAL_STATE which can be very large
+      const stateMatch = htmlText.match(/window\.__INITIAL_STATE__\s*=\s*({[\s\S]*?});\s*<\/script>/);
+      if (stateMatch) {
+        const state = JSON.parse(stateMatch[1]);
+        
+        // Extract comments from state
+        // Xiaoyuzhou state structure can vary, try multiple paths
+        const commentsData = state.episode?.comments || state.comments || state.comment?.comments || [];
+        if (commentsData && Array.isArray(commentsData)) {
+          commentsData.forEach((c: any) => {
+            // Find time point in text if not explicitly provided
+            let timePoint = Math.floor((c.time || 0) / 1000);
+            if (timePoint === 0 && c.text) {
+              const timeInText = c.text.match(/(\d{1,2}:\d{2}(?::\d{2})?)/);
+              if (timeInText) {
+                const parts = timeInText[1].split(':').map(Number);
+                if (parts.length === 2) timePoint = parts[0] * 60 + parts[1];
+                else if (parts.length === 3) timePoint = parts[0] * 3600 + parts[1] * 60 + parts[2];
+              }
+            }
+
+            comments.push({
+              id: c.id || Math.random().toString(36).substr(2, 9),
+              author: c.author?.nickname || '听众',
+              avatar: c.author?.avatar?.url || c.author?.avatar,
+              content: c.text || '',
+              timePoint: timePoint,
+              createdAt: c.createdAt || Date.now(),
+              likeCount: c.likeCount || 0
+            });
+          });
+        }
+
+        // Extract transcript if exists in state
+        const transcriptData = state.episode?.transcript || state.transcript || [];
+        if (transcriptData && Array.isArray(transcriptData) && transcriptData.length > 0) {
+          transcriptItems = transcriptData.map((t: any) => ({
+            timePoint: Math.floor((t.start || 0) / 1000),
+            content: t.text || ''
+          }));
+        }
+      }
+
+      // Fallback: If no comments in state, try parsing common patterns in HTML
+      if (comments.length === 0) {
+        // Look for any JSON-like objects that look like comments
+        const commentPattern = /\{"id":"([^"]+)","text":"([^"]+)","time":(\d+)/g;
+        let commentMatch;
+        while ((commentMatch = commentPattern.exec(htmlText)) !== null) {
+          comments.push({
+            id: commentMatch[1],
+            content: commentMatch[2],
+            timePoint: Math.floor(parseInt(commentMatch[3]) / 1000),
+            createdAt: Date.now()
+          });
+        }
+      }
+    } catch (e) {
+      console.error('Failed to extract data from Xiaoyuzhou state:', e);
+    }
+
     if (!audioUrl) {
-      throw new Error('Could not find audio URL in xiaoyuzhoufm page. The page structure may have changed.');
+      throw new Error('Could not find audio URL in xiaoyuzhoufm page.');
     }
     
     // Parse shownotes to separate intro and summary notes
@@ -245,6 +311,8 @@ async function parseXiaoyuzhoufmPage(url: string): Promise<PodcastData> {
       shownotes,
       intro,
       summaryNotes,
+      comments: comments.length > 0 ? comments : undefined,
+      transcript: transcriptItems.length > 0 ? transcriptItems : undefined,
     };
   } catch (error) {
     if (error instanceof Error) {

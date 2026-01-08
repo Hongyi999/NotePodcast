@@ -12,13 +12,19 @@ export function TabNavigation({ tabs, activeTab, onTabChange, showHint, hintText
   return (
     <div className="tab-navigation">
       {tabs.map((tab) => (
-        <button
-          key={tab}
-          className={`tab-button ${activeTab === tab ? 'active' : ''}`}
-          onClick={() => onTabChange(tab)}
-        >
-          {tab}
-        </button>
+        <div key={tab} className="tab-item">
+          <button
+            className={`tab-button ${activeTab === tab ? 'active' : ''}`}
+            onClick={() => onTabChange(tab)}
+            type="button"
+            aria-label={tab}
+          >
+            {tab}
+          </button>
+          <div className="tab-tooltip" role="tooltip">
+            <div className="tab-tooltip-content">{tab}</div>
+          </div>
+        </div>
       ))}
       {showHint && hintText && (
         <span className="tab-hint">{hintText}</span>

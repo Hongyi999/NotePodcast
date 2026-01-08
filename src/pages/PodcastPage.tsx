@@ -1,36 +1,34 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAudioPlayer } from '../hooks/useAudioPlayer';
 import { usePodcastData } from '../hooks/usePodcastData';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { AudioPlayer } from '../components/AudioPlayer';
 import { PodcastIntro } from '../components/PodcastIntro';
+import { BrandHeader } from '../components/BrandHeader';
+import { LoginButton } from '../components/LoginButton';
 import { TabNavigation } from '../components/TabNavigation';
 import { SummaryContent } from '../components/SummaryContent';
 import { NotesModule } from '../components/NotesModule';
 import { TranscriptsModule } from '../components/TranscriptsModule';
 import { CommentsModule } from '../components/CommentsModule';
 import { CorsErrorHelper } from '../components/CorsErrorHelper';
-import { SummaryTab, RightTab, SortOption } from '../types';
+import { SortOption } from '../types';
 import './PodcastPage.css';
-
-const RIGHT_TABS: { value: RightTab; label: string }[] = [
-  { value: 'notes', label: 'Notes' },
-  { value: 'transcripts', label: 'Transcripts' },
-  { value: 'comments', label: 'Comments' },
-];
 
 export function PodcastPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const url = searchParams.get('url');
 
-  const [leftTab, setLeftTab] = useState<SummaryTab>('original');
-  const [rightTab, setRightTab] = useState<RightTab>('notes');
+  const [leftTab, setLeftTab] = useState<string>('transcripts');
+  const [rightTab, setRightTab] = useState<string>('notes');
   const [sortOption, setSortOption] = useState<SortOption>('time');
-  const [summaryError, setSummaryError] = useState<string | null>(null);
+  const [leftWidth, setLeftWidth] = useState(60); // Percentage
+  const [isResizing, setIsResizing] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const { podcastData, loading, error, loadingSummaries, loadingTranscript, loadAISummary, loadTranscript } = usePodcastData(url);
+  const { podcastData, loading, error, loadingSummaries, loadingTranscript, loadTranscript } = usePodcastData(url);
   const { addNote, deleteNote, getSortedNotes } = useLocalStorage(url || '');
   const sortedNotes = getSortedNotes(sortOption);
 
@@ -48,64 +46,73 @@ export function PodcastPage() {
 
   const [transcriptError, setTranscriptError] = useState<string | null>(null);
 
-  // Get dynamic tab labels from AI summaries
-  const getLeftTabs = () => {
-    const tabs: { value: SummaryTab; label: string }[] = [
-      { value: 'original', label: 'Original Podcast Notes' },
+  // Resizing logic
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return;
+      const containerEl = containerRef.current;
+      if (!containerEl) return;
+
+      const rect = containerEl.getBoundingClientRect();
+      const minSidePx = 360; // hard limit so neither side becomes too small
+
+      const rawLeftPx = e.clientX - rect.left;
+      const clampedLeftPx = Math.min(Math.max(rawLeftPx, minSidePx), rect.width - minSidePx);
+      const newWidth = (clampedLeftPx / rect.width) * 100;
+
+      // soft limit in percentages for extra safety
+      if (newWidth >= 30 && newWidth <= 75) setLeftWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      document.body.style.cursor = 'default';
+    };
+
+    if (isResizing) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
+
+  const startResizing = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (e.button !== 0) return; // only left-click drags
+    setIsResizing(true);
+  };
+
+  const getRightTabs = () => {
+    const tabs: { value: string; label: string }[] = [
+      { value: 'notes', label: 'Notes' },
     ];
 
-    // Add AI summary tabs with personalized titles
     for (let i = 1; i <= 3; i++) {
       const summaryKey = `summary${i}` as 'summary1' | 'summary2' | 'summary3';
       const summary = podcastData?.summaries?.[summaryKey];
-      if (summary) {
-        tabs.push({
-          value: summaryKey,
-          label: summary.title,
-        });
-      } else {
-        // Show placeholder while loading
-        tabs.push({
-          value: summaryKey,
-          label: `AI Summary ${i}`,
-        });
-      }
+      tabs.push({
+        value: summaryKey,
+        label: summary ? summary.title : `AI关键词 ${i}`,
+      });
     }
-
     return tabs;
   };
 
-  // Load transcript when transcripts tab is selected
-  useEffect(() => {
-    if (rightTab === 'transcripts' && podcastData && !podcastData.transcript && !loadingTranscript) {
-      setTranscriptError(null);
-      loadTranscript().catch((error) => {
-        setTranscriptError(error instanceof Error ? error.message : 'Transcript loading failed');
-      });
-    }
-  }, [rightTab, podcastData, loadingTranscript, loadTranscript]);
+  const LEFT_TABS = [
+    { value: 'transcripts', label: 'Transcripts' },
+    { value: 'comments', label: 'Comments' },
+  ];
 
-  // Load AI summaries when AI tabs are selected
-  useEffect(() => {
-    if (leftTab.startsWith('summary') && podcastData?.audioUrl) {
-      const summaryIndex = parseInt(leftTab.replace('summary', ''));
-      const summaryKey = `summary${summaryIndex}` as 'summary1' | 'summary2' | 'summary3';
-      
-      if (!podcastData.summaries?.[summaryKey]) {
-        setSummaryError(null);
-        loadAISummary(summaryIndex).catch((error) => {
-          setSummaryError(error instanceof Error ? error.message : 'Summary loading failed, please refresh the page and try again');
-        });
-      }
-    }
-  }, [leftTab, podcastData, loadAISummary]);
-
-  // Auto-switch to first AI summary if no original notes
-  useEffect(() => {
-    if (leftTab === 'original' && podcastData && !podcastData.summaryNotes?.length && !podcastData.intro) {
-      setLeftTab('summary1');
-    }
-  }, [podcastData, leftTab]);
+  const getSummaryItems = (tabValue: string) => {
+    if (!podcastData) return [];
+    const summaryKey = tabValue as 'summary1' | 'summary2' | 'summary3';
+    return podcastData.summaries?.[summaryKey]?.items || [];
+  };
 
   const handleTimePointClick = (time: number) => {
     seek(time);
@@ -113,42 +120,6 @@ export function PodcastPage() {
       togglePlayPause();
     }
   };
-
-  const handleAddNote = (timePoint: number, content: string) => {
-    addNote(timePoint, content);
-  };
-
-  const getSummaryItems = () => {
-    if (!podcastData) return [];
-
-    switch (leftTab) {
-      case 'original':
-        // Return summary notes from 【内容提要】section
-        return podcastData.summaryNotes || [];
-      case 'summary1':
-        return podcastData.summaries?.summary1?.items || [];
-      case 'summary2':
-        return podcastData.summaries?.summary2?.items || [];
-      case 'summary3':
-        return podcastData.summaries?.summary3?.items || [];
-      default:
-        return [];
-    }
-  };
-
-  const getSummaryError = () => {
-    if (leftTab === 'original' && !podcastData?.summaryNotes?.length) {
-      return null; // Will auto-switch
-    }
-    if (leftTab.startsWith('summary') && loadingSummaries) {
-      return null; // Still loading
-    }
-    return summaryError;
-  };
-
-  // Mock comments for now (UI ready, API integration later)
-  const comments: any[] = [];
-  const leftTabs = getLeftTabs();
 
   if (!url) {
     navigate('/');
@@ -165,7 +136,6 @@ export function PodcastPage() {
 
   if (error) {
     const isCorsError = error.includes('CORS') || error.includes('Failed to fetch');
-    
     return (
       <div className="podcast-page error">
         <div className="error-message">{error}</div>
@@ -177,11 +147,29 @@ export function PodcastPage() {
     );
   }
 
+  const rightTabs = getRightTabs();
+
   return (
-    <div className="podcast-page">
-      <div className="podcast-container">
-        <div className="left-column">
-          <PodcastIntro intro={podcastData?.intro || ''} title={podcastData?.title} />
+    <div className={`podcast-page ${isResizing ? 'is-resizing' : ''}`}>
+      <div className="podcast-top-bar">
+        <div className="top-bar-left">
+          <BrandHeader variant="podcast" />
+        </div>
+        <div className="top-bar-right">
+          <LoginButton onClick={() => console.log('Login clicked')} />
+        </div>
+      </div>
+      
+      <div className="podcast-container" ref={containerRef}>
+        <div className="left-column" style={{ width: `${leftWidth}%` }}>
+          <div className="podcast-header-area">
+            {podcastData?.title && (
+              <div className="podcast-title-header">
+                <h2 className="podcast-title">{podcastData.title}</h2>
+              </div>
+            )}
+            <PodcastIntro intro={podcastData?.intro || ''} />
+          </div>
           
           <AudioPlayer
             isPlaying={isPlaying}
@@ -195,63 +183,80 @@ export function PodcastPage() {
             onSpeedChange={changeSpeed}
           />
 
-          <TabNavigation
-            tabs={leftTabs.map(t => t.label)}
-            activeTab={leftTabs.find(t => t.value === leftTab)?.label || leftTabs[0].label}
-            onTabChange={(label) => {
-              const tab = leftTabs.find(t => t.label === label);
-              if (tab) setLeftTab(tab.value);
-            }}
-            showHint={leftTab === 'original' && !podcastData?.summaryNotes?.length}
-            hintText={leftTab === 'original' && !podcastData?.summaryNotes?.length ? 'No Original Podcast Notes' : undefined}
-          />
+          <div className="left-content-area">
+            <TabNavigation
+              tabs={LEFT_TABS.map(t => t.label)}
+              activeTab={LEFT_TABS.find(t => t.value === leftTab)?.label || LEFT_TABS[0].label}
+              onTabChange={(label) => {
+                const tab = LEFT_TABS.find(t => t.label === label);
+                if (tab) setLeftTab(tab.value);
+              }}
+            />
 
-          <SummaryContent
-            items={getSummaryItems()}
-            onTimePointClick={handleTimePointClick}
-            isLoading={leftTab.startsWith('summary') && loadingSummaries}
-            error={getSummaryError() || undefined}
-          />
+            <div className="left-module-wrapper hidden-scrollbar">
+              {leftTab === 'transcripts' && (
+                <TranscriptsModule
+                  transcript={podcastData?.transcript || null}
+                  isLoading={loadingTranscript}
+                  error={transcriptError}
+                  currentTime={currentTime}
+                  onTimePointClick={handleTimePointClick}
+                />
+              )}
+              {leftTab === 'comments' && (
+                <CommentsModule
+                  comments={podcastData?.comments || []}
+                  onTimePointClick={handleTimePointClick}
+                />
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="divider" />
+        <div
+          className="divider-resizable"
+          onMouseDown={startResizing}
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize panels"
+        >
+          <div className="divider-handle">
+            <div className="handle-dot" />
+            <div className="handle-dot" />
+            <div className="handle-dot" />
+          </div>
+        </div>
 
-        <div className="right-column">
+        <div className="right-column" style={{ width: `${100 - leftWidth}%` }}>
           <TabNavigation
-            tabs={RIGHT_TABS.map(t => t.label)}
-            activeTab={RIGHT_TABS.find(t => t.value === rightTab)?.label || RIGHT_TABS[0].label}
+            tabs={rightTabs.map(t => t.label)}
+            activeTab={rightTabs.find(t => t.value === rightTab)?.label || rightTabs[0].label}
             onTabChange={(label) => {
-              const tab = RIGHT_TABS.find(t => t.label === label);
+              const tab = rightTabs.find(t => t.label === label);
               if (tab) setRightTab(tab.value);
             }}
           />
 
-          {rightTab === 'notes' && (
-            <NotesModule
-              sortedNotes={sortedNotes}
-              sortOption={sortOption}
-              currentTime={currentTime}
-              onAddNote={handleAddNote}
-              onDeleteNote={deleteNote}
-              onSortChange={setSortOption}
-              onTimePointClick={handleTimePointClick}
-            />
-          )}
-
-          {rightTab === 'transcripts' && (
-            <TranscriptsModule
-              transcript={podcastData?.transcript || null}
-              isLoading={loadingTranscript}
-              error={transcriptError}
-            />
-          )}
-
-          {rightTab === 'comments' && (
-            <CommentsModule
-              comments={comments}
-              onTimePointClick={handleTimePointClick}
-            />
-          )}
+          <div className="right-module-wrapper hidden-scrollbar">
+            {rightTab === 'notes' && (
+              <NotesModule
+                sortedNotes={sortedNotes}
+                sortOption={sortOption}
+                currentTime={currentTime}
+                onAddNote={addNote}
+                onDeleteNote={deleteNote}
+                onSortChange={setSortOption}
+                onTimePointClick={handleTimePointClick}
+              />
+            )}
+            {rightTab.startsWith('summary') && (
+              <SummaryContent
+                items={getSummaryItems(rightTab)}
+                onTimePointClick={handleTimePointClick}
+                isLoading={loadingSummaries}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>

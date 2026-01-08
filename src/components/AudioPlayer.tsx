@@ -47,29 +47,16 @@ export function AudioPlayer({
           aria-label={isPlaying ? 'Pause' : 'Play'}
         >
           {isPlaying ? (
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
               <rect x="4" y="2" width="3" height="12" fill="white" />
               <rect x="9" y="2" width="3" height="12" fill="white" />
             </svg>
           ) : (
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
               <path d="M4 2 L14 8 L4 14 Z" fill="white" />
             </svg>
           )}
         </button>
-
-        <select
-          className="speed-dropdown apple-dropdown"
-          value={speed}
-          onChange={(e) => onSpeedChange(Number(e.target.value))}
-          disabled={isLoading || !!error}
-        >
-          {SPEED_OPTIONS.map((opt) => (
-            <option key={opt} value={opt}>
-              {opt}x Speed
-            </option>
-          ))}
-        </select>
 
         <div className="progress-container">
           <div className="progress-bar" onClick={handleProgressClick}>
@@ -82,6 +69,19 @@ export function AudioPlayer({
             {formatTimeRange(currentTime, duration)}
           </span>
         </div>
+
+        <select
+          className="speed-dropdown"
+          value={speed}
+          onChange={(e) => onSpeedChange(Number(e.target.value))}
+          disabled={isLoading || !!error}
+        >
+          {SPEED_OPTIONS.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}x
+            </option>
+          ))}
+        </select>
       </div>
 
       {error && <div className="audio-error">{error}</div>}

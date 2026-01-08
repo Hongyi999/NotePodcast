@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { SummaryItem } from '../types';
 import { formatTime } from '../utils/timeFormatter';
 import './SummaryContent.css';
@@ -12,11 +12,30 @@ interface SummaryContentProps {
 
 export function SummaryContent({ items, onTimePointClick, isLoading, error }: SummaryContentProps) {
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleItemClick = (item: SummaryItem, index: number) => {
     onTimePointClick(item.timePoint);
     setHighlightedIndex(index);
-    setTimeout(() => setHighlightedIndex(null), 2000);
+    
+    // Clear existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    // Set new timeout
+    timeoutRef.current = setTimeout(() => {
+      setHighlightedIndex(null);
+      timeoutRef.current = null;
+    }, 2000);
   };
 
   if (isLoading) {

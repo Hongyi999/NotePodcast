@@ -1,21 +1,16 @@
 .podcast-intro {
-  background-color: var(--color-surface);
-  border-radius: var(--border-radius-md);
-  padding: 20px;
-  margin-bottom: 24px;
-}
-
-.podcast-intro-title {
-  font-size: 18px;
-  color: var(--color-text-primary);
-  margin-bottom: 12px;
-  font-weight: 600;
+  background-color: transparent;
+  border-radius: 0;
+  padding: 0; /* Reset padding, parent handles it now */
+  margin-bottom: 0;
 }
 
 .podcast-intro-content {
   font-size: 14px;
   color: var(--color-text-secondary);
-  line-height: 1.6;
+  line-height: 1.7;
+  max-width: 100%;
+  text-align: justify;
 }
 
 .podcast-intro-content p {

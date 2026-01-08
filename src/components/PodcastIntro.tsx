@@ -4,10 +4,9 @@ import './PodcastIntro.css';
 
 interface PodcastIntroProps {
   intro: string;
-  title?: string;
 }
 
-export function PodcastIntro({ intro, title }: PodcastIntroProps) {
+export function PodcastIntro({ intro }: PodcastIntroProps) {
   const [summarizedIntro, setSummarizedIntro] = useState<string>('');
   const [isSummarizing, setIsSummarizing] = useState(false);
 
@@ -41,7 +40,6 @@ export function PodcastIntro({ intro, title }: PodcastIntroProps) {
 
   return (
     <div className="podcast-intro">
-      {title && <h2 className="podcast-intro-title">{title}</h2>}
       <div className="podcast-intro-content">
         {isSummarizing ? (
           <p className="podcast-intro-loading">正在总结播客简介...</p>

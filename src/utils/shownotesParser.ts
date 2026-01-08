@@ -34,53 +34,55 @@ export function parseShownotes(shownotes: string): ParsedShownotes {
   const summaryNotes: SummaryItem[] = [];
   
   if (summaryText) {
-    // Split by lines and parse time-stamped entries
-    const lines = summaryText.split('\n').filter(line => line.trim());
+    // Find all time points in the text (format: HH:MM:SS or MM:SS)
+    // Match patterns like "08:59", "01:02:37", etc.
+    const timePattern = /(\d{1,2}:\d{2}(?::\d{2})?)/g;
+    const matches: Array<{ time: string; index: number }> = [];
     
-    for (const line of lines) {
-      const trimmedLine = line.trim();
-      
-      // Look for time patterns like "05:20 content" or "01:00:49 content"
-      const timePatterns = [
-        /^(\d{1,2}:\d{2}(?::\d{2})?)\s+(.+)$/, // MM:SS or HH:MM:SS at start
-        /^(\d{1,2}:\d{2})\s+(.+)$/, // MM:SS at start
-      ];
-      
-      for (const pattern of timePatterns) {
-        const match = trimmedLine.match(pattern);
-        if (match) {
-          const timeStr = match[1];
-          const content = match[2].trim();
-          
-          // Parse time to seconds
-          const timePoint = parseTime(timeStr);
-          
-          if (content && timePoint >= 0) {
-            summaryNotes.push({
-              timePoint,
-              content,
-            });
-            break;
-          }
+    let match;
+    while ((match = timePattern.exec(summaryText)) !== null) {
+      matches.push({
+        time: match[1],
+        index: match.index,
+      });
+    }
+    
+    // Split content by time points, but exclude the last time point
+    // (last time point is usually followed by notes/recommendations, not content)
+    if (matches.length > 1) {
+      // Only process up to the second-to-last time point
+      for (let i = 0; i < matches.length - 1; i++) {
+        const currentMatch = matches[i];
+        const nextMatch = matches[i + 1];
+        
+        // Get content between this time point and the next
+        const startIndex = currentMatch.index + currentMatch.time.length;
+        const endIndex = nextMatch.index;
+        const content = summaryText.substring(startIndex, endIndex).trim();
+        
+        // Parse time to seconds
+        const timePoint = parseTime(currentMatch.time);
+        
+        // Only add if we have valid content
+        if (content && timePoint >= 0) {
+          summaryNotes.push({
+            timePoint,
+            content,
+          });
         }
       }
+    } else if (matches.length === 1) {
+      // If only one time point, include it (edge case)
+      const currentMatch = matches[0];
+      const startIndex = currentMatch.index + currentMatch.time.length;
+      const content = summaryText.substring(startIndex).trim();
+      const timePoint = parseTime(currentMatch.time);
       
-      // If no time pattern found but line has content, try to extract time from anywhere in the line
-      if (!summaryNotes.length || summaryNotes[summaryNotes.length - 1].content !== trimmedLine) {
-        const anyTimePattern = /(\d{1,2}:\d{2}(?::\d{2})?)/;
-        const timeMatch = trimmedLine.match(anyTimePattern);
-        if (timeMatch) {
-          const timeStr = timeMatch[1];
-          const content = trimmedLine.replace(timeMatch[0], '').trim();
-          const timePoint = parseTime(timeStr);
-          
-          if (content && timePoint >= 0) {
-            summaryNotes.push({
-              timePoint,
-              content,
-            });
-          }
-        }
+      if (content && timePoint >= 0) {
+        summaryNotes.push({
+          timePoint,
+          content,
+        });
       }
     }
   }
