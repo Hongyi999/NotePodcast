@@ -14,6 +14,19 @@ These work best and provide full podcast metadata:
 - `https://example.com/podcast.xml`
 - `https://podcast.example.com/feed.xml`
 
+### ✅ YouTube URLs (Requires Local Backend)
+You can paste YouTube links like:
+- `https://youtu.be/twzLDx9iers`
+- `https://www.youtube.com/watch?v=twzLDx9iers`
+
+**Important:** YouTube audio cannot be played/parsed directly from the browser. NotePodcast uses a **local Node backend** to resolve and stream audio for playback (and then generate transcript/AI summaries).
+
+**How to run (two terminals):**
+- Terminal A (backend):
+  - `npm run dev:server`
+- Terminal B (frontend):
+  - `npm run dev`
+
 ### ✅ Xiaoyuzhoufm.com (小宇宙) URLs
 You can use xiaoyuzhoufm.com episode page URLs directly:
 - `https://www.xiaoyuzhoufm.com/episode/6953815414db1df9ef81f6b4`
@@ -123,6 +136,10 @@ Use the podcast's direct RSS feed URL, which:
 ### "Failed to fetch" (Network Error)
 - Network issue or the feed is down
 - **Solution:** Check your internet connection and try again later
+
+### YouTube: "Failed to resolve YouTube video"
+- **Cause:** The local backend is not running, or the YouTube URL is invalid/blocked.
+- **Solution:** Start the backend (`npm run dev:server`) and retry. Then keep `npm run dev` running for the UI.
 
 ## Tips
 

@@ -83,28 +83,60 @@ export function usePodcastData(url: string | null) {
     }
   };
 
-  // Automatically load all AI summaries and transcript when podcast data is ready
+  // Automatically load AI summaries when podcast data is ready
   useEffect(() => {
-    if (podcastData && podcastData.audioUrl && !podcastData.summaries?.summary1 && !loadingSummaries) {
-      const context = {
-        title: podcastData.title,
-        description: podcastData.description,
-        shownotes: podcastData.shownotes
-      };
-      
-      // Load all 3 summaries in parallel
-      Promise.all([
-        loadAISummary(1, context),
-        loadAISummary(2, context),
-        loadAISummary(3, context)
-      ]).catch(err => console.error('Error pre-loading AI summaries:', err));
+    if (!podcastData?.audioUrl) return;
+    if (loadingSummaries) return;
 
-      // Also pre-load transcript if it's missing
-      if (!podcastData.transcript && !loadingTranscript) {
-        loadTranscript(context).catch(err => console.error('Error pre-loading transcript:', err));
-      }
-    }
-  }, [podcastData?.audioUrl]);
+    const missing: number[] = [];
+    if (!podcastData.summaries?.summary1) missing.push(1);
+    if (!podcastData.summaries?.summary2) missing.push(2);
+    if (!podcastData.summaries?.summary3) missing.push(3);
+    if (missing.length === 0) return;
+
+    const context = {
+      title: podcastData.title,
+      description: podcastData.description,
+      shownotes: podcastData.shownotes,
+    };
+
+    Promise.all(missing.map((i) => loadAISummary(i, context))).catch((err) =>
+      console.error('Error pre-loading AI summaries:', err)
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    podcastData?.audioUrl,
+    podcastData?.summaries?.summary1,
+    podcastData?.summaries?.summary2,
+    podcastData?.summaries?.summary3,
+    podcastData?.title,
+    podcastData?.description,
+    podcastData?.shownotes,
+    loadingSummaries,
+  ]);
+
+  // Automatically load transcript when podcast data is ready
+  useEffect(() => {
+    if (!podcastData?.audioUrl) return;
+    if (podcastData.transcript) return;
+    if (loadingTranscript) return;
+
+    const context = {
+      title: podcastData.title,
+      description: podcastData.description,
+      shownotes: podcastData.shownotes,
+    };
+
+    loadTranscript(context).catch((err) => console.error('Error pre-loading transcript:', err));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    podcastData?.audioUrl,
+    podcastData?.transcript,
+    podcastData?.title,
+    podcastData?.description,
+    podcastData?.shownotes,
+    loadingTranscript,
+  ]);
 
   return {
     podcastData,

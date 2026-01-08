@@ -123,6 +123,37 @@ function isXiaoyuzhoufmUrl(url: string): boolean {
 }
 
 /**
+ * Checks if URL is a YouTube URL
+ */
+function isYouTubeUrl(url: string): boolean {
+  return url.includes('youtube.com/watch') || url.includes('youtu.be/');
+}
+
+async function parseYouTubePage(url: string): Promise<PodcastData> {
+  // Use local backend to resolve metadata + proxy audio for <audio>
+  const infoRes = await fetch(`/api/youtube/info?url=${encodeURIComponent(url)}`);
+  if (!infoRes.ok) {
+    const err = await infoRes.json().catch(() => ({}));
+    throw new Error(err?.error || 'Failed to resolve YouTube video');
+  }
+  const info = await infoRes.json();
+
+  const title = info.title || 'YouTube Episode';
+  const description = info.description || '';
+  const shownotes = description;
+  const { intro, summaryNotes } = parseShownotes(shownotes);
+
+  return {
+    audioUrl: `/api/youtube/audio?url=${encodeURIComponent(url)}`,
+    title,
+    description,
+    shownotes,
+    intro,
+    summaryNotes,
+  };
+}
+
+/**
  * Parses xiaoyuzhoufm.com (小宇宙) HTML page to extract audio URL and metadata
  */
 async function parseXiaoyuzhoufmPage(url: string): Promise<PodcastData> {
@@ -512,6 +543,11 @@ export async function extractPodcastData(url: string): Promise<PodcastData> {
     };
   }
   
+  // Check if it's a YouTube URL (requires local backend)
+  if (isYouTubeUrl(url)) {
+    return await parseYouTubePage(url);
+  }
+
   // Check if it's a xiaoyuzhoufm.com URL and parse the HTML page
   if (isXiaoyuzhoufmUrl(url)) {
     return await parseXiaoyuzhoufmPage(url);
