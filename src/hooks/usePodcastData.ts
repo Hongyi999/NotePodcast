@@ -58,7 +58,25 @@ export function usePodcastData(url: string | null) {
       return summary;
     } catch (err) {
       console.error(`Failed to load AI summary ${index}:`, err);
-      throw err;
+      // Don't throw - return a placeholder instead
+      const placeholder = {
+        title: 'AI 摘要生成失败',
+        items: [{ timePoint: 0, content: 'API配额不足或请求过多，请稍后重试' }]
+      };
+      
+      setPodcastData(prev => {
+        if (!prev) return prev;
+        const summaryKey = `summary${index}` as 'summary1' | 'summary2' | 'summary3';
+        return {
+          ...prev,
+          summaries: {
+            ...prev.summaries,
+            [summaryKey]: placeholder,
+          },
+        };
+      });
+      
+      return placeholder;
     } finally {
       setLoadingSummaries(false);
     }
@@ -78,6 +96,12 @@ export function usePodcastData(url: string | null) {
       setPodcastData(prev => prev ? { ...prev, transcript } : null);
     } catch (err) {
       console.error('Failed to load transcript:', err);
+      // Set placeholder transcript so page can continue
+      const placeholder = [{ 
+        timePoint: 0, 
+        content: 'AI 转录生成失败。可能原因：API配额不足或请求过多。您仍然可以收听音频并添加笔记。' 
+      }];
+      setPodcastData(prev => prev ? { ...prev, transcript: placeholder } : null);
     } finally {
       setLoadingTranscript(false);
     }
@@ -94,15 +118,43 @@ export function usePodcastData(url: string | null) {
     if (!podcastData.summaries?.summary3) missing.push(3);
     if (missing.length === 0) return;
 
+    console.log('[usePodcastData] Loading missing AI summaries:', missing);
+
     const context = {
       title: podcastData.title,
       description: podcastData.description,
       shownotes: podcastData.shownotes,
     };
 
-    Promise.all(missing.map((i) => loadAISummary(i, context))).catch((err) =>
-      console.error('Error pre-loading AI summaries:', err)
-    );
+    // Use allSettled instead of all so individual failures don't block everything
+    Promise.allSettled(missing.map((i) => loadAISummary(i, context)))
+      .then((results) => {
+        const failed = results.filter(r => r.status === 'rejected');
+        if (failed.length > 0) {
+          console.warn('[usePodcastData] Some AI summaries failed:', failed.length);
+          
+          // Set placeholder for failed summaries
+          setPodcastData(prev => {
+            if (!prev) return prev;
+            const newSummaries = { ...prev.summaries };
+            
+            results.forEach((result, idx) => {
+              if (result.status === 'rejected') {
+                const summaryIndex = missing[idx];
+                const summaryKey = `summary${summaryIndex}` as 'summary1' | 'summary2' | 'summary3';
+                newSummaries[summaryKey] = { 
+                  title: 'AI 摘要生成失败', 
+                  items: [{ timePoint: 0, content: 'API配额不足，请充值后重试或稍后在播客页面重新生成' }] 
+                };
+              }
+            });
+            
+            return { ...prev, summaries: newSummaries };
+          });
+        } else {
+          console.log('[usePodcastData] All AI summaries loaded successfully');
+        }
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     podcastData?.audioUrl,
@@ -118,8 +170,10 @@ export function usePodcastData(url: string | null) {
   // Automatically load transcript when podcast data is ready
   useEffect(() => {
     if (!podcastData?.audioUrl) return;
-    if (podcastData.transcript) return;
+    if (podcastData.transcript && podcastData.transcript.length > 0) return;
     if (loadingTranscript) return;
+
+    console.log('[usePodcastData] Loading transcript...');
 
     const context = {
       title: podcastData.title,
@@ -127,7 +181,10 @@ export function usePodcastData(url: string | null) {
       shownotes: podcastData.shownotes,
     };
 
-    loadTranscript(context).catch((err) => console.error('Error pre-loading transcript:', err));
+    // loadTranscript now handles errors internally and sets placeholder
+    loadTranscript(context).then(() => 
+      console.log('[usePodcastData] Transcript loading completed')
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     podcastData?.audioUrl,

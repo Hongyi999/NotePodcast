@@ -1,7 +1,7 @@
 {
   "name": "notepodcast",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.90.1",
     "cors": "^2.8.5",
     "express": "^5.2.1",
     "react": "^18.2.0",

@@ -50,12 +50,43 @@
 
 .brand-logo {
   flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.brand-logo-clickable {
+  cursor: pointer;
+  border-radius: 12px;
+  padding: 4px;
+  margin: -4px;
+}
+
+.brand-logo-clickable:hover {
+  background: rgba(0, 122, 255, 0.08);
+  transform: scale(1.05);
+}
+
+.brand-logo-clickable:active {
+  transform: scale(0.98);
+}
+
+.brand-logo-clickable:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .brand-logo .logo-icon {
   width: 56px;
   height: 56px;
   color: var(--color-primary);
+  transition: all 0.2s ease;
+}
+
+.brand-logo-clickable .logo-icon {
+  filter: drop-shadow(0 2px 4px rgba(0, 122, 255, 0.2));
+}
+
+.brand-logo-clickable:hover .logo-icon {
+  filter: drop-shadow(0 4px 8px rgba(0, 122, 255, 0.3));
 }
 
 .brand-text {

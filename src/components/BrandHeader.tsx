@@ -3,9 +3,16 @@ import './BrandHeader.css';
 interface BrandHeaderProps {
   variant?: 'home' | 'podcast';
   subtitle?: string;
+  onLogoClick?: () => void;
 }
 
-export function BrandHeader({ variant = 'home', subtitle }: BrandHeaderProps) {
+export function BrandHeader({ variant = 'home', subtitle, onLogoClick }: BrandHeaderProps) {
+  const handleLogoClick = () => {
+    if (onLogoClick) {
+      onLogoClick();
+    }
+  };
+
   return (
     <div className={`brand-header brand-header-${variant}`}>
       <div className="brand-header-background">
@@ -36,7 +43,19 @@ export function BrandHeader({ variant = 'home', subtitle }: BrandHeaderProps) {
         </svg>
       </div>
       <div className="brand-header-content">
-        <div className="brand-logo">
+        <div 
+          className={`brand-logo ${onLogoClick ? 'brand-logo-clickable' : ''}`}
+          onClick={handleLogoClick}
+          role={onLogoClick ? 'button' : undefined}
+          tabIndex={onLogoClick ? 0 : undefined}
+          onKeyDown={(e) => {
+            if (onLogoClick && (e.key === 'Enter' || e.key === ' ')) {
+              e.preventDefault();
+              handleLogoClick();
+            }
+          }}
+          title={onLogoClick ? 'Back to Home' : undefined}
+        >
           <svg className="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="logoPlanetGradient" x1="0%" y1="0%" x2="100%" y2="100%">

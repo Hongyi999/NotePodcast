@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { isValidUrl } from '../utils/urlValidator';
 import { BrandHeader } from '../components/BrandHeader';
 import { LoginButton } from '../components/LoginButton';
+import { LoginModal } from '../components/LoginModal';
 import './HomePage.css';
 
 export function HomePage() {
   const [url, setUrl] = useState('');
   const [error, setError] = useState('');
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,12 +48,12 @@ export function HomePage() {
 
 
   const handleLogin = () => {
-    // TODO: Implement login functionality
-    console.log('Login clicked');
+    setIsLoginModalOpen(true);
   };
 
   return (
     <div className="home-page">
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
       <div className="home-top-bar">
         <div className="top-bar-left">
           <svg className="podcast-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -65,7 +67,7 @@ export function HomePage() {
           </svg>
         </div>
         <div className="top-bar-right">
-          <LoginButton onClick={handleLogin} />
+          <LoginButton onLoginClick={handleLogin} variant="light" />
         </div>
       </div>
       
@@ -118,8 +120,7 @@ export function HomePage() {
         <div className="description-card">
           <h3 className="card-title">Don't let podcast wisdom fade away.</h3>
           <p className="card-text">
-            Notepodcast doesn't just stream audio. We help you lock in takeaways in the moment. 
-            Record reflections. Sort knowledge. Revisit anytime. Grow smarter, live better.
+            Notepodcast doesn't just stream audio. We help you lock in takeaways in the moment. Record reflections. Sort knowledge. Revisit anytime. Grow smarter, live better.
           </p>
           <div className="card-graphic">
             <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">

@@ -2,11 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAudioPlayer } from '../hooks/useAudioPlayer';
 import { usePodcastData } from '../hooks/usePodcastData';
-import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useNotes } from '../hooks/useNotes';
 import { AudioPlayer } from '../components/AudioPlayer';
 import { PodcastIntro } from '../components/PodcastIntro';
 import { BrandHeader } from '../components/BrandHeader';
 import { LoginButton } from '../components/LoginButton';
+import { LoginModal } from '../components/LoginModal';
+import { LimitReachedModal } from '../components/LimitReachedModal';
 import { TabNavigation } from '../components/TabNavigation';
 import { SummaryContent } from '../components/SummaryContent';
 import { NotesModule } from '../components/NotesModule';
@@ -21,6 +23,8 @@ export function PodcastPage() {
   const navigate = useNavigate();
   const url = searchParams.get('url');
 
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
   const [leftTab, setLeftTab] = useState<string>('transcripts');
   const [rightTab, setRightTab] = useState<string>('notes');
   const [sortOption, setSortOption] = useState<SortOption>('time');
@@ -29,8 +33,17 @@ export function PodcastPage() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { podcastData, loading, error, loadingSummaries, loadingTranscript, loadTranscript } = usePodcastData(url);
-  const { addNote, deleteNote, getSortedNotes } = useLocalStorage(url || '');
+  const { addNote, deleteNote, getSortedNotes } = useNotes(url || '');
   const sortedNotes = getSortedNotes(sortOption);
+
+  const handleAddNote = async (time: number, content: string) => {
+    const result = await addNote(time, content);
+    if (result === 'limit_reached') {
+      setIsLimitModalOpen(true);
+    } else if (result === 'error') {
+      alert('Failed to add note. Please try again.');
+    }
+  };
 
   const {
     isPlaying,
@@ -151,12 +164,23 @@ export function PodcastPage() {
 
   return (
     <div className={`podcast-page ${isResizing ? 'is-resizing' : ''}`}>
+      {/* Modals - rendered at top level for proper positioning */}
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
+      <LimitReachedModal 
+        isOpen={isLimitModalOpen} 
+        onClose={() => setIsLimitModalOpen(false)} 
+        onLoginClick={() => setIsLoginModalOpen(true)}
+      />
+      
       <div className="podcast-top-bar">
         <div className="top-bar-left">
-          <BrandHeader variant="podcast" />
+          <BrandHeader 
+            variant="podcast" 
+            onLogoClick={() => navigate('/')}
+          />
         </div>
         <div className="top-bar-right">
-          <LoginButton onClick={() => console.log('Login clicked')} />
+          <LoginButton onLoginClick={() => setIsLoginModalOpen(true)} variant="light" />
         </div>
       </div>
       
@@ -243,7 +267,7 @@ export function PodcastPage() {
                 sortedNotes={sortedNotes}
                 sortOption={sortOption}
                 currentTime={currentTime}
-                onAddNote={addNote}
+                onAddNote={handleAddNote}
                 onDeleteNote={deleteNote}
                 onSortChange={setSortOption}
                 onTimePointClick={handleTimePointClick}

@@ -9,6 +9,7 @@ export function LoadingPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const url = searchParams.get('url')?.trim() || null;
+  const [waitTime, setWaitTime] = React.useState(0);
 
   const { podcastData, loading, error, loadingSummaries, loadingTranscript } = usePodcastData(url);
 
@@ -20,22 +21,40 @@ export function LoadingPage() {
     if (podcastData?.summaries?.summary1) done += 1;
     if (podcastData?.summaries?.summary2) done += 1;
     if (podcastData?.summaries?.summary3) done += 1;
-    if (podcastData?.transcript) done += 1;
+    if (podcastData?.transcript && podcastData.transcript.length > 0) done += 1;
 
     const percent = Math.round((done / total) * 100);
     return { done, total, percent };
   }, [podcastData]);
 
-  const isReady =
-    !!podcastData?.audioUrl &&
+  // Ready when we have audio URL and either:
+  // 1. All AI content is loaded successfully, OR
+  // 2. AI generation failed but we have placeholder data (allowing user to continue)
+  const hasAllAIContent = 
     !!podcastData?.summaries?.summary1 &&
     !!podcastData?.summaries?.summary2 &&
     !!podcastData?.summaries?.summary3 &&
     !!podcastData?.transcript &&
+    podcastData.transcript.length > 0;
+
+  const isReady =
+    !!podcastData?.audioUrl &&
+    hasAllAIContent &&
     !loading &&
     !loadingSummaries &&
     !loadingTranscript &&
     !error;
+
+  // Track wait time for debugging
+  useEffect(() => {
+    if (!podcastData?.audioUrl || loading) return;
+    
+    const interval = setInterval(() => {
+      setWaitTime(prev => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [podcastData?.audioUrl, loading]);
 
   useEffect(() => {
     if (!url) {
@@ -43,15 +62,44 @@ export function LoadingPage() {
       return;
     }
     if (isReady) {
+      console.log('[LoadingPage] All data ready, navigating to podcast page');
       navigate(`/podcast?url=${encodeURIComponent(url)}`);
     }
   }, [isReady, navigate, url]);
+
+  // Debug logging
+  useEffect(() => {
+    if (podcastData && waitTime > 0 && waitTime % 5 === 0) {
+      console.log('[LoadingPage] Debug status:', {
+        audioUrl: !!podcastData.audioUrl,
+        summary1: !!podcastData.summaries?.summary1,
+        summary2: !!podcastData.summaries?.summary2,
+        summary3: !!podcastData.summaries?.summary3,
+        transcript: podcastData.transcript?.length || 0,
+        loading,
+        loadingSummaries,
+        loadingTranscript,
+        error,
+        waitTime
+      });
+    }
+  }, [waitTime, podcastData, loading, loadingSummaries, loadingTranscript, error]);
 
   const handleLogin = () => {
     console.log('Login clicked');
   };
 
+  const handleSkipAndContinue = () => {
+    if (podcastData?.audioUrl) {
+      console.log('[LoadingPage] User chose to skip AI generation and continue');
+      navigate(`/podcast?url=${encodeURIComponent(url)}`);
+    }
+  };
+
   if (!url) return null;
+
+  // Show skip button after 10 seconds of waiting (faster for API quota issues)
+  const canSkip = waitTime >= 10 && podcastData?.audioUrl && !error;
 
   return (
     <div className="loading-page">
@@ -81,6 +129,7 @@ export function LoadingPage() {
                 <div className="loading-title">Analyzing podcast</div>
                 <div className="loading-subtitle">
                   Preparing transcript and AI summaries. This page will auto-redirect when ready.
+                  {waitTime > 15 && <><br /><small style={{ opacity: 0.7 }}>This may take 1-2 minutes for long podcasts...</small></>}
                 </div>
               </div>
             </div>
@@ -96,6 +145,7 @@ export function LoadingPage() {
                 </span>
               </div>
             </div>
+
 
             <div className="loading-skeleton-card" aria-hidden>
               <div className="skeleton-thumb" />

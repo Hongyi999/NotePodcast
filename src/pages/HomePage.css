@@ -38,12 +38,12 @@
 
 .home-container {
   width: 100%;
-  max-width: 680px;
+  max-width: 620px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 32px;
-  padding: 120px 24px 60px;
+  gap: 36px;
+  padding: 140px 32px 80px;
   align-items: center;
 }
 
@@ -63,16 +63,22 @@
   display: flex;
   align-items: center;
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-md);
-  padding: 0 16px;
-  gap: 12px;
-  transition: all 0.2s ease;
+  border: 1.5px solid var(--color-border);
+  border-radius: 12px;
+  padding: 5px 5px 5px 16px;
+  gap: 8px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.url-input-wrapper:hover {
+  border-color: rgba(0, 122, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .url-input-wrapper:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.12), 0 4px 16px rgba(0, 122, 255, 0.08);
 }
 
 .link-icon {
@@ -80,11 +86,18 @@
   height: 20px;
   color: var(--color-text-secondary);
   flex-shrink: 0;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+}
+
+.url-input-wrapper:focus-within .link-icon {
+  opacity: 1;
+  color: var(--color-primary);
 }
 
 .url-input {
   flex: 1;
-  height: 56px;
+  height: 48px;
   border: none;
   background: transparent;
   font-size: 15px;
@@ -92,76 +105,95 @@
   color: var(--color-text-primary);
   outline: none;
   padding: 0;
+  letter-spacing: -0.2px;
+  min-width: 0;
 }
 
 .url-input::placeholder {
   color: var(--color-text-hint);
+  opacity: 0.6;
 }
 
 .input-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
 .lucky-button {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   background: none;
   border: none;
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  padding: 8px 12px;
-  border-radius: var(--border-radius-sm);
-  transition: all 0.2s ease;
+  padding: 7px 9px;
+  border-radius: 7px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: var(--font-family);
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .lucky-button:hover {
-  background-color: rgba(0, 122, 255, 0.08);
+  background-color: rgba(0, 122, 255, 0.1);
   color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.lucky-button:active {
+  transform: translateY(0);
 }
 
 .sparkle-icon {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   color: currentColor;
 }
 
 .submit-button {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 8px;
   border: none;
-  background-color: var(--color-surface);
-  color: var(--color-text-secondary);
+  background: linear-gradient(135deg, #007AFF 0%, #0066CC 100%);
+  color: white;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3), 0 1px 2px rgba(0, 122, 255, 0.2);
+  font-weight: 600;
+  min-width: 0;
 }
 
 .submit-button:hover:not(:disabled) {
-  background-color: var(--color-primary);
-  color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+  box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4), 0 2px 4px rgba(0, 122, 255, 0.25);
+  background: linear-gradient(135deg, #0088FF 0%, #0070DD 100%);
+}
+
+.submit-button:active:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.35);
 }
 
 .submit-button:disabled {
-  opacity: 0.4;
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 .arrow-icon {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   color: currentColor;
 }
 
@@ -178,46 +210,60 @@
 
 .description-card {
   width: 100%;
-  max-width: 380px;
-  background-color: #FFFFFF;
+  max-width: 460px;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 100%);
   border: 1px solid #E5E7EB;
-  border-radius: 12px;
-  padding: 20px 24px;
+  border-radius: 14px;
+  padding: 24px 28px;
   position: relative;
   overflow: hidden;
   margin: 0 auto;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.03),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    0 4px 16px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.description-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    0 4px 12px rgba(0, 0, 0, 0.06),
+    0 8px 24px rgba(0, 0, 0, 0.04);
 }
 
 .card-title {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
-  color: #374151;
+  color: #1F2937;
   margin: 0 0 10px 0;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.4px;
   position: relative;
   z-index: 1;
-  line-height: 1.4;
+  line-height: 1.35;
 }
 
 .card-text {
   font-size: 13px;
   color: #6B7280;
-  line-height: 1.6;
+  line-height: 1.55;
   margin: 0;
-  letter-spacing: -0.1px;
+  letter-spacing: -0.15px;
   position: relative;
   z-index: 1;
   padding-right: 0;
+  max-width: 100%;
+  word-spacing: -0.03em;
 }
 
 .card-graphic {
   position: absolute;
-  right: 12px;
-  top: 12px;
-  width: 80px;
-  height: 80px;
-  opacity: 0.35;
+  right: 16px;
+  top: 16px;
+  width: 90px;
+  height: 90px;
+  opacity: 0.25;
   pointer-events: none;
   z-index: 0;
 }
@@ -229,13 +275,15 @@
   }
 
   .home-container {
-    padding: 100px 20px 40px;
-    gap: 24px;
+    padding: 110px 20px 50px;
+    gap: 32px;
+    max-width: 100%;
   }
 
   .url-input-wrapper {
-    padding: 0 12px;
+    padding: 6px 6px 6px 14px;
     gap: 8px;
+    border-radius: 12px;
   }
 
   .url-input {
@@ -246,37 +294,45 @@
   .lucky-button {
     font-size: 0;
     padding: 8px;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
     justify-content: center;
-    min-width: 32px;
+    min-width: 36px;
   }
 
   .lucky-button .sparkle-icon {
     margin: 0;
+    width: 16px;
+    height: 16px;
+  }
+
+  .submit-button {
+    height: 40px;
+    padding: 0 18px;
   }
 
   .description-card {
-    padding: 18px 20px;
+    padding: 24px 24px;
     max-width: 100%;
+    border-radius: 14px;
   }
 
   .card-title {
-    font-size: 15px;
+    font-size: 16px;
   }
 
   .card-text {
-    font-size: 12px;
+    font-size: 13px;
     padding-right: 0;
     max-width: 100%;
   }
 
   .card-graphic {
-    width: 80px;
-    height: 80px;
-    right: 16px;
-    top: 16px;
-    opacity: 0.4;
+    width: 75px;
+    height: 75px;
+    right: 14px;
+    top: 14px;
+    opacity: 0.3;
   }
 }
