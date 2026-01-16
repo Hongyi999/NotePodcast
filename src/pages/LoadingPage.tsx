@@ -85,21 +85,9 @@ export function LoadingPage() {
     }
   }, [waitTime, podcastData, loading, loadingSummaries, loadingTranscript, error]);
 
-  const handleLogin = () => {
-    console.log('Login clicked');
-  };
-
-  const handleSkipAndContinue = () => {
-    if (podcastData?.audioUrl) {
-      console.log('[LoadingPage] User chose to skip AI generation and continue');
-      navigate(`/podcast?url=${encodeURIComponent(url)}`);
-    }
-  };
+  // Removed unused handleLogin, handleSkipAndContinue, and canSkip
 
   if (!url) return null;
-
-  // Show skip button after 10 seconds of waiting (faster for API quota issues)
-  const canSkip = waitTime >= 10 && podcastData?.audioUrl && !error;
 
   return (
     <div className="loading-page">
@@ -108,7 +96,7 @@ export function LoadingPage() {
           <BrandHeader variant="podcast" />
         </div>
         <div className="top-bar-right">
-          <LoginButton onClick={handleLogin} />
+          <LoginButton onLoginClick={() => console.log('Login clicked')} />
         </div>
       </div>
 

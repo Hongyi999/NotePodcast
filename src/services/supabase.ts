@@ -40,12 +40,13 @@ class MockSupabaseClient {
       this.authSubscribers.push(callback);
       return { data: { subscription: { unsubscribe: () => {} } } };
     },
-    signUp: async ({ email, password }: any) => {
+    signUp: async ({ email }: any) => {
       // Old signUp method - not recommended, redirect to use OTP
       console.warn('[Mock] signUp called - please use signInWithOtp for email verification flow');
+      console.log('[Mock] Email:', email);
       return { data: { user: null, session: null }, error: new Error('Please use email verification code to sign up') };
     },
-    signInWithPassword: async ({ email, password }: any) => {
+    signInWithPassword: async ({ email }: any) => {
       // Check if user exists in registered users
       const userExists = this.registeredUsers.find(u => u.email === email);
       
@@ -59,7 +60,7 @@ class MockSupabaseClient {
       // In mock mode, we don't actually verify password, just check existence
       return this.mockSignIn(email);
     },
-    signInWithOtp: async ({ email, options }: any) => {
+    signInWithOtp: async ({ email }: any) => {
       // Mock OTP - generate a fake 6-digit code and store it
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       console.log(`%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, 'color: #4CAF50;');
@@ -75,7 +76,7 @@ class MockSupabaseClient {
       
       return { data: { user: null, session: null }, error: null };
     },
-    verifyOtp: async ({ email, token, type }: any) => {
+    verifyOtp: async ({ email, token }: any) => {
       // Mock OTP verification
       const storedOtp = localStorage.getItem('mock_otp_' + email);
       const timestamp = localStorage.getItem('mock_otp_timestamp_' + email);
@@ -142,7 +143,7 @@ class MockSupabaseClient {
     if (table !== 'notes') return { select: () => ({ data: [], error: null }) };
 
     return {
-      select: (columns: string) => {
+      select: (_columns: string) => {
         return {
           eq: (field: string, value: any) => {
             // Support chaining for .eq('podcast_url', ...).eq('user_id', ...)
@@ -151,7 +152,7 @@ class MockSupabaseClient {
               eq: (field2: string, value2: any) => {
                  return this.queryNotes([filter1, { field: field2, value: value2 }]);
               },
-              order: (field: string) => this.queryNotes([filter1]) // fallback
+              order: (_orderField: string) => this.queryNotes([filter1]) // fallback
             };
           }
         };

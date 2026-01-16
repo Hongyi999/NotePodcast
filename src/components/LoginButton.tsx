@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import './LoginButton.css';
 import { useAuth } from '../context/AuthContext';
 import { LogoutModal } from './LogoutModal';

@@ -32,7 +32,7 @@ export function PodcastPage() {
   const [isResizing, setIsResizing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { podcastData, loading, error, loadingSummaries, loadingTranscript, loadTranscript } = usePodcastData(url);
+  const { podcastData, loading, error, loadingSummaries, loadingTranscript } = usePodcastData(url);
   const { addNote, deleteNote, getSortedNotes } = useNotes(url || '');
   const sortedNotes = getSortedNotes(sortOption);
 
@@ -57,7 +57,7 @@ export function PodcastPage() {
     changeSpeed,
   } = useAudioPlayer(podcastData?.audioUrl || null);
 
-  const [transcriptError, setTranscriptError] = useState<string | null>(null);
+  // Removed unused transcriptError state
 
   // Resizing logic
   useEffect(() => {
@@ -222,7 +222,7 @@ export function PodcastPage() {
                 <TranscriptsModule
                   transcript={podcastData?.transcript || null}
                   isLoading={loadingTranscript}
-                  error={transcriptError}
+                  error={null}
                   currentTime={currentTime}
                   onTimePointClick={handleTimePointClick}
                 />
