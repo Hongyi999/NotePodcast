@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/NotePodcast/', // GitHub Pages subpath - must match repo name
+  base: '/', // Use root path for custom domain
   plugins: [react()],
   server: {
     proxy: {

@@ -8,7 +8,7 @@ import './styles/globals.css';
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter basename="/NotePodcast">
+      <BrowserRouter>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/loading" element={<LoadingPage />} />
