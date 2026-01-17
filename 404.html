@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>NotePodcast</title>
+  <script>
+    // GitHub Pages SPA redirect
+    // This script takes the current url and converts the path and query
+    // string into just a query string, and then redirects the browser
+    // to the new url with only a query string and hash fragment
+    (function(){
+      var path = window.location.pathname.split('/').slice(1);
+      var route = path.join('/');
+      var search = window.location.search;
+      var hash = window.location.hash;
+      
+      var redirect = '/NotePodcast/?' + 
+        (route ? 'p=/' + route : '') + 
+        (search ? '&' + search.slice(1) : '') +
+        hash;
+      
+      window.location.replace(redirect);
+    })();
+  </script>
+</head>
+<body>
+</body>
+</html>
